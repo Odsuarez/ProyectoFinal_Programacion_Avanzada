@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurante | Iniciar sesión</title>
+    <link rel="stylesheet" href="css/estilos.css">
+    <script src="js/login.js" defer></script>
+</head>
+<body>
+    <main class="contenedor">
+        <section class="presentacion">
+            <p class="marca">RESTAURANTE XYZ</p>
+            <h1>Todo listo para una buena atención.</h1>
+            <p>Gestiona las mesas, las reservas, el menú y los pedidos desde un mismo lugar.</p>
+        </section>
+        <section class="tarjeta" aria-labelledby="titulo-login">
+            <p class="etiqueta">ACCESO AL SISTEMA</p>
+            <h2 id="titulo-login">Iniciar sesión</h2>
+            <p class="descripcion">Ingresa tus datos para continuar.</p>
+            <form id="formulario-login" novalidate>
+                <label for="identificador">Usuario o correo</label>
+                <input id="identificador" name="identificador" type="text" autocomplete="username" required aria-describedby="mensaje">
+                <label for="contrasena">Contraseña</label>
+                <input id="contrasena" name="contrasena" type="password" autocomplete="current-password" required aria-describedby="mensaje">
+                <button type="submit">Iniciar sesión</button>
+                <p id="mensaje" class="mensaje" role="status" aria-live="polite"></p>
+            </form>
+            <p class="nota">Primera versión: validación de campos. La conexión de autenticación se realizará en la siguiente etapa.</p>
+        </section>
+    </main>
+</body>
+</html>
+

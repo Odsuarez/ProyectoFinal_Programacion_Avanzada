@@ -1,0 +1,28 @@
+* { box-sizing: border-box; }
+:root { font-family: Arial, Helvetica, sans-serif; color: #24332c; background: #f3f1eb; }
+body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 32px 20px; }
+.contenedor { width: min(960px, 100%); display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+.marca, .etiqueta { font-size: 12px; font-weight: bold; letter-spacing: 2px; color: #4a6a54; }
+h1 { font-size: clamp(32px, 4vw, 48px); line-height: 1.12; margin: 24px 0; }
+.presentacion > p:last-child { color: #59675e; line-height: 1.7; max-width: 360px; }
+.tarjeta { background: white; padding: 36px; border: 1px solid #dedfd7; border-radius: 20px; box-shadow: 0 16px 50px #24332c0a; }
+h2 { margin: 16px 0 8px; font-size: 28px; }
+.descripcion, .nota { color: #66736b; line-height: 1.5; }
+form { margin-top: 28px; }
+label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: bold; }
+input { width: 100%; padding: 13px; margin-bottom: 20px; border: 1px solid #bdc8bf; border-radius: 8px; font: inherit; }
+input:focus { outline: 3px solid #d8e6dc; border-color: #42684d; }
+input[aria-invalid="true"] { border-color: #a62c2c; }
+button { width: 100%; border: 0; border-radius: 8px; background: #294f38; color: white; padding: 14px; font: inherit; font-weight: bold; cursor: pointer; }
+button:hover { background: #1d3d29; }
+button:focus-visible { outline: 3px solid #98b9a1; outline-offset: 3px; }
+.mensaje { min-height: 42px; margin-bottom: 0; font-size: 14px; line-height: 1.5; }
+.mensaje.error { color: #a62c2c; }
+.mensaje.informacion { color: #294f38; }
+.nota { margin-top: 24px; padding-top: 18px; border-top: 1px solid #eceee9; font-size: 12px; }
+@media (max-width: 700px) {
+    .contenedor { grid-template-columns: 1fr; gap: 24px; max-width: 460px; }
+    .tarjeta { padding: 26px; }
+    h1 { margin: 14px 0; }
+}
+
