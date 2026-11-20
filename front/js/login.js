@@ -6,6 +6,16 @@ const contrasena = document.getElementById("contrasena");
 const mensaje = document.getElementById("mensaje");
 const botonContrasena = document.getElementById("alternar-contrasena");
 
+[identificador, contrasena].forEach(function (campo) {
+    campo.addEventListener("input", function () {
+        mensaje.textContent = "";
+        mensaje.className = "mensaje";
+        if (campo.value.trim() !== "") {
+            campo.setAttribute("aria-invalid", "false");
+        }
+    });
+});
+
 botonContrasena.addEventListener("click", function () {
     const mostrar = contrasena.type === "password";
     contrasena.type = mostrar ? "text" : "password";
