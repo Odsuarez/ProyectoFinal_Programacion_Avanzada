@@ -5,14 +5,13 @@ const identificador = document.getElementById("identificador");
 const contrasena = document.getElementById("contrasena");
 const mensaje = document.getElementById("mensaje");
 const botonContrasena = document.getElementById("alternar-contrasena");
+const botonIngreso = formulario.querySelector('button[type="submit"]');
 
 [identificador, contrasena].forEach(function (campo) {
     campo.addEventListener("input", function () {
         mensaje.textContent = "";
         mensaje.className = "mensaje";
-        if (campo.value.trim() !== "") {
-            campo.setAttribute("aria-invalid", "false");
-        }
+        if (campo.value.trim() !== "") campo.setAttribute("aria-invalid", "false");
     });
 });
 
@@ -23,12 +22,12 @@ botonContrasena.addEventListener("click", function () {
     botonContrasena.setAttribute("aria-pressed", String(mostrar));
 });
 
-formulario.addEventListener("submit", function (evento) {
+formulario.addEventListener("submit", async function (evento) {
     evento.preventDefault();
+    if (botonIngreso.disabled) return;
 
     const faltaIdentificador = identificador.value.trim() === "";
     const faltaContrasena = contrasena.value.trim() === "";
-
     identificador.setAttribute("aria-invalid", String(faltaIdentificador));
     contrasena.setAttribute("aria-invalid", String(faltaContrasena));
 
@@ -39,9 +38,35 @@ formulario.addEventListener("submit", function (evento) {
         return;
     }
 
-    mensaje.className = "mensaje informacion";
-    mensaje.textContent = "Campos completos. La conexión con el servicio de autenticación está pendiente.";
-    // Día 2: consumir el endpoint de login con fetch y procesar su respuesta.
-    // No se almacenan contraseñas ni se simula una sesión.
+    botonIngreso.disabled = true;
+    botonIngreso.textContent = "Ingresando...";
+    mensaje.textContent = "";
+    const cancelacion = new AbortController();
+    const tiempoLimite = setTimeout(() => cancelacion.abort(), 15000);
+    try {
+        const respuesta = await fetch("/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Accept": "application/json" },
+            body: JSON.stringify({
+                identificador: identificador.value.trim(),
+                contrasena: contrasena.value
+            }),
+            signal: cancelacion.signal
+        });
+        const datos = await respuesta.json();
+        if (!respuesta.ok) throw new Error(datos.mensaje || "No se pudo iniciar sesión.");
+        sessionStorage.setItem("token", datos.token);
+        contrasena.value = "";
+        window.location.assign("/inicio");
+    } catch (error) {
+        mensaje.className = "mensaje error";
+        mensaje.textContent = error instanceof TypeError || error.name === "AbortError"
+            ? "No se pudo conectar con el servicio. Intenta nuevamente."
+            : error.message;
+    } finally {
+        clearTimeout(tiempoLimite);
+        botonIngreso.disabled = false;
+        botonIngreso.textContent = "Iniciar sesión";
+    }
 });
 

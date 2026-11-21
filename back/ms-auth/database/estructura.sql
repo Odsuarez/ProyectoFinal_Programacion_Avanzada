@@ -1,7 +1,7 @@
-CREATE DATABASE IF NOT EXISTS restaurante_auth
+CREATE DATABASE IF NOT EXISTS `ms-auth`
     CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-USE restaurante_auth;
+USE `ms-auth`;
 
 CREATE TABLE IF NOT EXISTS usuarios (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

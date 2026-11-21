@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurante | Inicio</title>
+    <link rel="stylesheet" href="/css/estilos.css">
+    <script src="/js/inicio.js" defer></script>
+</head>
+<body>
+    <main class="tarjeta panel">
+        <p class="marca">RESTAURANTE XYZ</p>
+        <h1>Bienvenido</h1>
+        <p id="estado-sesion" class="descripcion" role="status">Comprobando tu sesión...</p>
+        <section id="datos-sesion" hidden>
+            <h2 id="nombre-usuario"></h2>
+            <p id="rol-usuario"></p>
+            <p>La sesión está activa. Los módulos de mesas, reservas, productos y pedidos se desarrollarán después.</p>
+            <button id="cerrar-sesion" type="button">Cerrar sesión</button>
+        </section>
+        <p id="mensaje" class="mensaje" role="status" aria-live="polite"></p>
+        <a id="volver-login" href="/" hidden>Volver al login</a>
+    </main>
+</body>
+</html>
+

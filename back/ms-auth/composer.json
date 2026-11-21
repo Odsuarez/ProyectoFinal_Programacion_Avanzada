@@ -12,7 +12,8 @@
     },
     "scripts": {
         "start": "php -S 127.0.0.1:8000 -t public public/index.php",
-        "check-db": "php comprobar_conexion.php"
+        "check-db": "php comprobar_conexion.php",
+        "crear-admin": "php crear_admin.php"
     },
     "autoload": {
         "psr-4": {

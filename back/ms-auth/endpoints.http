@@ -1,0 +1,23 @@
+@baseUrl = http://127.0.0.1:8000
+@token = REEMPLAZAR_CON_EL_TOKEN_DEL_LOGIN
+
+### Estado del servicio (no comprueba MySQL)
+GET {{baseUrl}}/health
+
+### Iniciar sesión por usuario o por correo
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+    "identificador": "admin",
+    "contrasena": "admin123"
+}
+
+### Consultar sesión
+GET {{baseUrl}}/sesion
+Authorization: Bearer {{token}}
+
+### Cerrar sesión: invalida el token en MySQL
+POST {{baseUrl}}/logout
+Authorization: Bearer {{token}}
+
