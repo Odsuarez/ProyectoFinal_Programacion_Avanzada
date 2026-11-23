@@ -1,0 +1,24 @@
+{
+    "name": "restaurante/ms-reservas",
+    "description": "Microservicio de mesas y reservas",
+    "type": "project",
+    "require": {
+        "php": "^8.0",
+        "ext-pdo": "*",
+        "ext-pdo_mysql": "*",
+        "ext-mbstring": "*",
+        "slim/slim": "^4.0",
+        "slim/psr7": "^1.0",
+        "illuminate/database": "^9.0"
+    },
+    "scripts": {
+        "start": "php -S 127.0.0.1:8001 -t public public/index.php",
+        "check-db": "php comprobar_conexion.php"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+}
+
