@@ -16,9 +16,11 @@ try {
             exit(1);
         }
     }
-    echo "Conexion correcta. Las tablas mesas y reservas estan disponibles.\n";
+    $autenticacion = $capsule->getConnection('auth');
+    $autenticacion->table('usuarios')->select('id', 'token', 'sesion_activa', 'estado')->limit(1)->get();
+    echo "Conexion correcta. Mesas y reservas disponibles; lectura de usuarios en ms-auth correcta.\n";
 } catch (Throwable $error) {
-    fwrite(STDERR, "No se pudo comprobar la conexion. Revisa MySQL y app/Config/database.local.php.\n");
+    fwrite(STDERR, "No se pudo comprobar la conexion. Revisa MySQL y los archivos app/Config/database.local.php y auth.local.php.\n");
     exit(1);
 }
 

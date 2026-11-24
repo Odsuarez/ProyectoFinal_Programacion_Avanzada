@@ -1,0 +1,152 @@
+@baseUrl = http://127.0.0.1:8001
+@authUrl = http://127.0.0.1:8000
+@token = REEMPLAZAR_CON_TOKEN_ORIGINAL_DEL_LOGIN
+@mesaId = 1
+@reservaId = 1
+@fecha = 2026-12-20
+
+# Cambia fecha por una fecha futura y los IDs por los que existan.
+# Ejecutar con REST Client de VS Code o reproducir en Postman.
+# No pegar la huella guardada en MySQL: se usa el token que responde /login.
+# Este archivo describe el contrato de la API; NO ejecuta todo automáticamente.
+#
+# Configuracion:
+# - database.local.php: conexion a ms-reservas; conserva tu archivo actual.
+# - auth.local.php: conexion de lectura a ms-auth (copiar auth.example.php si hace falta).
+# - composer check-db comprueba ambas conexiones.
+# - composer start inicia este servicio en el puerto 8001.
+#
+# Respuestas:
+# 200 consulta/cambio correcto; 201 creado; 204 preflight.
+# 400 JSON mal formado; 401 sesion inexistente/inactiva o token invalido.
+# 404 registro/ruta inexistente; 405 metodo no permitido.
+# 409 duplicado/conflicto; 415 Content-Type incorrecto; 422 validacion.
+# 500 problema interno o conexion no disponible (no expone credenciales).
+#
+# Reglas:
+# - Cuerpos como objeto JSON; capacidad, cantidad_personas y mesa_id son enteros.
+# - Estados mesa: disponible, reservada, ocupada, fuera_servicio.
+# - Reserva inicial: pendiente. Estados: pendiente, confirmada, cancelada, finalizada.
+# - Cancelada/finalizada no se editan ni reactivan; repetir el mismo estado es inocuo.
+# - Horario: fecha AAAA-MM-DD y hora HH:MM o HH:MM:SS, zona America/Bogota.
+# - Unicidad de reserva activa: mesa + fecha + hora exacta.
+# - No se supone duracion de reservas: el Word no la define.
+# - Canceladas/finalizadas no bloquean el horario.
+# - Una reserva futura no cambia por si sola el estado actual de la mesa.
+# - Disponibilidad segun horario, capacidad y fuera_servicio.
+# - No se reduce capacidad si deja sin espacio una reserva activa futura.
+# - Ninguna ruta de negocio es publica. /health y OPTIONS no requieren token.
+# - Ambos roles activos pueden operar: el Word no define permisos distintos.
+# - CORS permite los origenes http://127.0.0.1:8000 y http://localhost:8000.
+
+### Obtener token (ms-auth debe estar encendido). Copiar token de la respuesta arriba.
+POST {{authUrl}}/login
+Content-Type: application/json
+
+{
+  "identificador": "empleado",
+  "contrasena": "empleado123"
+}
+
+### Estado del servicio (no comprueba la base)
+GET {{baseUrl}}/health
+
+### Listar mesas
+GET {{baseUrl}}/mesas
+Authorization: Bearer {{token}}
+
+### Consultar una mesa
+GET {{baseUrl}}/mesas/{{mesaId}}
+Authorization: Bearer {{token}}
+
+### Crear mesa (nombre/numero unico)
+POST {{baseUrl}}/mesas
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "numero": "MESA-5",
+  "capacidad": 6,
+  "estado": "disponible"
+}
+
+### Editar capacidad y/o estado. PUT y PATCH admiten actualizacion parcial.
+PATCH {{baseUrl}}/mesas/{{mesaId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "capacidad": 8
+}
+
+### Cambiar estado de mesa
+PATCH {{baseUrl}}/mesas/{{mesaId}}/estado
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "estado": "ocupada"
+}
+
+### Consultar mesas disponibles para una fecha, hora y cantidad
+GET {{baseUrl}}/mesas/disponibles?fecha={{fecha}}&hora=19:00&cantidad_personas=4
+Authorization: Bearer {{token}}
+
+### Crear reserva. nombre_cliente, telefono_cliente, cantidad_personas, fecha, hora y mesa_id obligatorios.
+# observaciones es opcional (texto o null). El estado inicial siempre es pendiente.
+POST {{baseUrl}}/reservas
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nombre_cliente": "Cliente de prueba",
+  "telefono_cliente": "3001234567",
+  "cantidad_personas": 4,
+  "fecha": "{{fecha}}",
+  "hora": "19:00",
+  "mesa_id": {{mesaId}},
+  "observaciones": "Cerca de la ventana"
+}
+
+### Listar reservas con datos de la mesa
+GET {{baseUrl}}/reservas
+Authorization: Bearer {{token}}
+
+### Filtrar por fecha, cliente (coincidencia parcial literal) y estado
+# Los filtros se pueden usar solos o combinados. Codificar espacios y caracteres de URL.
+GET {{baseUrl}}/reservas?fecha={{fecha}}&cliente=Cliente&estado=pendiente
+Authorization: Bearer {{token}}
+
+### Consultar reserva
+GET {{baseUrl}}/reservas/{{reservaId}}
+Authorization: Bearer {{token}}
+
+### Editar fecha, hora, mesa_id, cantidad_personas y/u observaciones
+# No se modifican nombre_cliente, telefono_cliente ni estado en esta ruta.
+PATCH {{baseUrl}}/reservas/{{reservaId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "hora": "20:00",
+  "cantidad_personas": 3,
+  "observaciones": "Observacion actualizada"
+}
+
+### Confirmar o finalizar reserva mediante su estado
+PATCH {{baseUrl}}/reservas/{{reservaId}}/estado
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "estado": "confirmada"
+}
+
+### Cancelar reserva (no elimina la fila)
+POST {{baseUrl}}/reservas/{{reservaId}}/cancelar
+Authorization: Bearer {{token}}
+
+### Cerrar sesion en ms-auth. El token dejara de servir tambien en ms-reservas.
+POST {{authUrl}}/logout
+Authorization: Bearer {{token}}
+

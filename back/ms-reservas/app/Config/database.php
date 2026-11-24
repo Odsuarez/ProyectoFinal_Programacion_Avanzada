@@ -19,6 +19,7 @@ if (is_file($archivoLocal)) {
 }
 $capsule = new Capsule();
 $capsule->addConnection($configuracion);
+$capsule->addConnection(require __DIR__ . '/auth.php', 'auth');
 $capsule->setAsGlobal();
 $capsule->bootEloquent();
 return $capsule;
