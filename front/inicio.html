@@ -8,15 +8,29 @@
     <script src="/js/inicio.js" defer></script>
 </head>
 <body>
-    <main class="tarjeta panel">
+    <main class="tarjeta panel panel-inicio">
         <p class="marca">RESTAURANTE XYZ</p>
         <h1>Bienvenido</h1>
         <p id="estado-sesion" class="descripcion" role="status">Comprobando tu sesión...</p>
         <section id="datos-sesion" hidden>
-            <h2 id="nombre-usuario"></h2>
-            <p id="rol-usuario"></p>
-            <p>La sesión está activa. Los módulos de mesas, reservas, productos y pedidos se desarrollarán después.</p>
-            <button id="cerrar-sesion" type="button">Cerrar sesión</button>
+            <header class="cabecera-inicio">
+                <div>
+                    <h2 id="nombre-usuario"></h2>
+                    <p id="rol-usuario" class="descripcion"></p>
+                </div>
+                <button id="cerrar-sesion" class="boton-secundario" type="button">Cerrar sesión</button>
+            </header>
+            <section class="seccion-mesas" aria-labelledby="titulo-mesas">
+                <div class="cabecera-mesas">
+                    <div>
+                        <p class="etiqueta">SALÓN DEL RESTAURANTE</p>
+                        <h2 id="titulo-mesas">Mesas</h2>
+                    </div>
+                    <button id="actualizar-mesas" class="boton-secundario" type="button">Actualizar mesas</button>
+                </div>
+                <p id="mensaje-mesas" class="descripcion" role="status" aria-live="polite"></p>
+                <div id="lista-mesas" class="lista-mesas" aria-busy="false"></div>
+            </section>
         </section>
         <p id="mensaje" class="mensaje" role="status" aria-live="polite"></p>
         <a id="volver-login" href="/" hidden>Volver al login</a>

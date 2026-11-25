@@ -31,3 +31,22 @@ button:focus-visible { outline: 3px solid #98b9a1; outline-offset: 3px; }
 
 button:disabled { opacity: 0.65; cursor: wait; }
 .panel { width: min(620px, 100%); }
+.panel-inicio { width: min(960px, 100%); }
+.cabecera-inicio, .cabecera-mesas { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.cabecera-inicio h2, .cabecera-mesas h2 { margin-top: 0; }
+.boton-secundario { width: auto; background: #eef3ee; color: #294f38; border: 1px solid #bdc8bf; }
+.boton-secundario:hover { background: #dde8df; }
+.seccion-mesas { margin-top: 30px; padding-top: 26px; border-top: 1px solid #e0e5df; }
+.lista-mesas { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 20px; }
+.mesa { border: 1px solid #dce3db; border-radius: 12px; padding: 20px; background: #fafbf8; }
+.mesa h3 { margin: 0 0 12px; font-size: 18px; overflow-wrap: anywhere; }
+.mesa p { color: #59675e; font-size: 14px; line-height: 1.5; }
+.estado-mesa { display: inline-block; border-radius: 20px; padding: 6px 10px; background: #eee; color: #333; font-size: 12px; font-weight: bold; }
+.estado-disponible { background: #e2efe4; color: #275b35; }
+.estado-reservada { background: #fff0cc; color: #795000; }
+.estado-ocupada { background: #e4eafb; color: #334f91; }
+.estado-fuera_servicio { background: #f5e0de; color: #8e3830; }
+@media (max-width: 560px) {
+    .cabecera-inicio, .cabecera-mesas { align-items: flex-start; flex-direction: column; gap: 10px; }
+    .lista-mesas { grid-template-columns: 1fr; }
+}
