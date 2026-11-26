@@ -8,6 +8,7 @@ const volverLogin = document.getElementById("volver-login");
 const actualizarMesas = document.getElementById("actualizar-mesas");
 const mensajeMesas = document.getElementById("mensaje-mesas");
 const listaMesas = document.getElementById("lista-mesas");
+const filtroEstado = document.getElementById("filtro-estado");
 
 // El frontend se abre desde ms-auth en el puerto 8000.
 const API_RESERVAS = "http://" + window.location.hostname + ":8001";
@@ -19,6 +20,7 @@ const nombresEstados = {
 };
 let peticionMesas = null;
 let revisionSesion = 0;
+let mesasCargadas = [];
 
 function cancelarCargaMesas() {
     if (peticionMesas) peticionMesas.abort();
@@ -32,8 +34,10 @@ function volverAlLogin() {
 }
 
 function mostrarMesas(mesas) {
+    const mesasVisibles = mesas.filter(mesa => filtroEstado.value === "" || mesa.estado === filtroEstado.value);
+    mensajeMesas.className = "descripcion";
     listaMesas.replaceChildren();
-    for (const mesa of mesas) {
+    for (const mesa of mesasVisibles) {
         const tarjeta = document.createElement("article");
         tarjeta.className = "mesa";
         const nombre = document.createElement("h3");
@@ -47,9 +51,15 @@ function mostrarMesas(mesas) {
         tarjeta.append(nombre, capacidad, estadoMesa);
         listaMesas.append(tarjeta);
     }
-    mensajeMesas.textContent = mesas.length === 0
-        ? "Todavía no hay mesas registradas."
-        : mesas.length + (mesas.length === 1 ? " mesa registrada." : " mesas registradas.");
+    if (mesas.length === 0) {
+        mensajeMesas.textContent = "Todavía no hay mesas registradas.";
+    } else if (filtroEstado.value === "") {
+        mensajeMesas.textContent = mesas.length + (mesas.length === 1 ? " mesa registrada." : " mesas registradas.");
+    } else if (mesasVisibles.length === 0) {
+        mensajeMesas.textContent = "No hay mesas con ese estado (0 de " + mesas.length + ").";
+    } else {
+        mensajeMesas.textContent = "Mostrando " + mesasVisibles.length + " de " + mesas.length + " mesas.";
+    }
 }
 
 async function cargarMesas() {
@@ -63,6 +73,8 @@ async function cargarMesas() {
     peticionMesas = cancelacion;
     const limite = setTimeout(() => cancelacion.abort(), 10000);
     actualizarMesas.disabled = true;
+    filtroEstado.disabled = true;
+    mesasCargadas = [];
     listaMesas.replaceChildren();
     listaMesas.setAttribute("aria-busy", "true");
     mensajeMesas.className = "descripcion";
@@ -81,7 +93,10 @@ async function cargarMesas() {
         if (!respuesta.ok) throw new Error("No se pudieron consultar las mesas.");
         const datos = await respuesta.json();
         if (!Array.isArray(datos.mesas)) throw new Error("Respuesta inválida.");
-        if (peticionMesas === cancelacion) mostrarMesas(datos.mesas);
+        if (peticionMesas === cancelacion) {
+            mesasCargadas = datos.mesas;
+            mostrarMesas(mesasCargadas);
+        }
     } catch (error) {
         if (peticionMesas === cancelacion && !datosSesion.hidden) {
             mensajeMesas.className = "mensaje error";
@@ -92,6 +107,7 @@ async function cargarMesas() {
         if (peticionMesas === cancelacion) {
             peticionMesas = null;
             actualizarMesas.disabled = false;
+            filtroEstado.disabled = mesasCargadas.length === 0;
             listaMesas.setAttribute("aria-busy", "false");
         }
     }
@@ -132,6 +148,9 @@ async function consultarSesion() {
 }
 
 actualizarMesas.addEventListener("click", cargarMesas);
+filtroEstado.addEventListener("change", function () {
+    mostrarMesas(mesasCargadas);
+});
 
 cerrarSesion.addEventListener("click", async function () {
     cerrarSesion.disabled = true;
@@ -159,6 +178,8 @@ window.addEventListener("pageshow", function () {
     datosSesion.hidden = true;
     cancelarCargaMesas();
     listaMesas.replaceChildren();
+    mesasCargadas = [];
+    filtroEstado.disabled = true;
     mensajeMesas.textContent = "";
     consultarSesion();
 });

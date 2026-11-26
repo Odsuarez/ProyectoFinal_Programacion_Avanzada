@@ -46,6 +46,10 @@ button:disabled { opacity: 0.65; cursor: wait; }
 .estado-reservada { background: #fff0cc; color: #795000; }
 .estado-ocupada { background: #e4eafb; color: #334f91; }
 .estado-fuera_servicio { background: #f5e0de; color: #8e3830; }
+.filtros-mesas { margin-top: 22px; }
+.filtros-mesas select { width: 100%; max-width: 280px; padding: 11px 12px; border: 1px solid #bdc8bf; border-radius: 8px; color: #24332c; background: white; font: inherit; }
+.filtros-mesas select:focus-visible { outline: 3px solid #d8e6dc; border-color: #42684d; }
+.filtros-mesas select:disabled { background: #f3f3ef; color: #66736b; }
 @media (max-width: 560px) {
     .cabecera-inicio, .cabecera-mesas { align-items: flex-start; flex-direction: column; gap: 10px; }
     .lista-mesas { grid-template-columns: 1fr; }

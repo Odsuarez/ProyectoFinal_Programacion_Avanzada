@@ -28,6 +28,16 @@
                     </div>
                     <button id="actualizar-mesas" class="boton-secundario" type="button">Actualizar mesas</button>
                 </div>
+                <div class="filtros-mesas">
+                    <label for="filtro-estado">Filtrar por estado</label>
+                    <select id="filtro-estado" disabled>
+                        <option value="">Todas las mesas</option>
+                        <option value="disponible">Disponibles</option>
+                        <option value="reservada">Reservadas</option>
+                        <option value="ocupada">Ocupadas</option>
+                        <option value="fuera_servicio">Fuera de servicio</option>
+                    </select>
+                </div>
                 <p id="mensaje-mesas" class="descripcion" role="status" aria-live="polite"></p>
                 <div id="lista-mesas" class="lista-mesas" aria-busy="false"></div>
             </section>
