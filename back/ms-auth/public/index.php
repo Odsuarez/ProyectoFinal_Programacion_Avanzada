@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 
 use App\Http\Json;
 use Psr\Http\Message\ServerRequestInterface;

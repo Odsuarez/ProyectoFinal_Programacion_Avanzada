@@ -1,15 +1,14 @@
 <?php
-declare(strict_types=1);
+
 use App\Http\Json;
 use App\Middleware\Cors;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Exception\HttpException;
 use Slim\Factory\AppFactory;
 
-$configuracion = require __DIR__ . '/Config/aplicacion.php';
-date_default_timezone_set($configuracion['timezone']);
+date_default_timezone_set('America/Bogota');
 $app = AppFactory::create();
-$app->addBodyParsingMiddleware();
+
 $app->addRoutingMiddleware();
 $errores = $app->addErrorMiddleware(false, true, true);
 $errores->setDefaultErrorHandler(function (

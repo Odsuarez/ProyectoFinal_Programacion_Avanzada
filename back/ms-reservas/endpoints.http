@@ -11,9 +11,8 @@
 # Este archivo describe el contrato de la API; NO ejecuta todo automáticamente.
 #
 # Configuracion:
-# - database.local.php: conexion a ms-reservas; conserva tu archivo actual.
-# - auth.local.php: conexion de lectura a ms-auth (copiar auth.example.php si hace falta).
-# - composer check-db comprueba ambas conexiones.
+# - database.php: datos directos de conexion a ms-reservas y ms-auth.
+# - La segunda conexion de database.php consulta ms-auth en modo lectura.
 # - composer start inicia este servicio en el puerto 8001.
 #
 # Respuestas:
@@ -35,7 +34,7 @@
 # - Una reserva futura no cambia por si sola el estado actual de la mesa.
 # - Disponibilidad segun horario, capacidad y fuera_servicio.
 # - No se reduce capacidad si deja sin espacio una reserva activa futura.
-# - Ninguna ruta de negocio es publica. /health y OPTIONS no requieren token.
+# - Todas las rutas de negocio requieren token. OPTIONS permite el preflight del navegador.
 # - Ambos roles activos pueden operar: el Word no define permisos distintos.
 # - CORS permite los origenes http://127.0.0.1:8000 y http://localhost:8000.
 
@@ -47,9 +46,6 @@ Content-Type: application/json
   "identificador": "empleado",
   "contrasena": "empleado123"
 }
-
-### Estado del servicio (no comprueba la base)
-GET {{baseUrl}}/health
 
 ### Listar mesas
 GET {{baseUrl}}/mesas

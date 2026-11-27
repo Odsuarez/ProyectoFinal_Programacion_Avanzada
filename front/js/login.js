@@ -41,8 +41,6 @@ formulario.addEventListener("submit", async function (evento) {
     botonIngreso.disabled = true;
     botonIngreso.textContent = "Ingresando...";
     mensaje.textContent = "";
-    const cancelacion = new AbortController();
-    const tiempoLimite = setTimeout(() => cancelacion.abort(), 15000);
     try {
         const respuesta = await fetch("/login", {
             method: "POST",
@@ -50,8 +48,7 @@ formulario.addEventListener("submit", async function (evento) {
             body: JSON.stringify({
                 identificador: identificador.value.trim(),
                 contrasena: contrasena.value
-            }),
-            signal: cancelacion.signal
+            })
         });
         const datos = await respuesta.json();
         if (!respuesta.ok) throw new Error(datos.mensaje || "No se pudo iniciar sesión.");
@@ -60,11 +57,10 @@ formulario.addEventListener("submit", async function (evento) {
         window.location.assign("/inicio");
     } catch (error) {
         mensaje.className = "mensaje error";
-        mensaje.textContent = error instanceof TypeError || error.name === "AbortError"
+        mensaje.textContent = error instanceof TypeError
             ? "No se pudo conectar con el servicio. Intenta nuevamente."
             : error.message;
     } finally {
-        clearTimeout(tiempoLimite);
         botonIngreso.disabled = false;
         botonIngreso.textContent = "Iniciar sesión";
     }

@@ -1,8 +1,8 @@
 <?php
-declare(strict_types=1);
+
 use App\Controllers\MesaController;
 use App\Controllers\ReservaController;
-use App\Http\Json;
+
 use App\Middleware\Autenticacion;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -10,9 +10,6 @@ use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
 
 return function (App $app): void {
-    $app->get('/health', function (ServerRequestInterface $request, ResponseInterface $response): ResponseInterface {
-        return Json::responder($response, ['servicio' => 'ms-reservas', 'estado' => 'disponible']);
-    });
     $app->options('/{ruta:.*}', function (ServerRequestInterface $request, ResponseInterface $response): ResponseInterface {
         return $response->withStatus(204);
     });

@@ -1,8 +1,7 @@
 <?php
-declare(strict_types=1);
 
 use App\Controllers\AuthController;
-use App\Http\Json;
+
 use App\Middleware\Autenticacion;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -15,9 +14,6 @@ return function (App $app): void {
     $app->post('/login', [$controlador, 'login']);
     $app->get('/sesion', [$controlador, 'sesion'])->add($autenticacion);
     $app->post('/logout', [$controlador, 'logout'])->add($autenticacion);
-    $app->get('/health', function (ServerRequestInterface $request, ResponseInterface $response): ResponseInterface {
-        return Json::responder($response, ['servicio' => 'ms-auth', 'estado' => 'disponible']);
-    });
 
     // Lista explícita: no se sirven archivos PHP, configuración ni rutas arbitrarias.
     $carpetaFront = dirname(__DIR__, 4) . '/front';

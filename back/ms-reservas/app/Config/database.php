@@ -1,26 +1,36 @@
 <?php
-declare(strict_types=1);
+
 use Illuminate\Database\Capsule\Manager as Capsule;
 
-$configuracion = [
+$capsule = new Capsule();
+
+// Base de datos de este microservicio.
+$capsule->addConnection([
     'driver' => 'mysql',
-    'host' => getenv('DB_HOST') ?: '127.0.0.1',
-    'port' => getenv('DB_PORT') ?: '3306',
-    'database' => getenv('DB_DATABASE') ?: 'ms-reservas',
-    'username' => getenv('DB_USERNAME') ?: 'root',
-    'password' => getenv('DB_PASSWORD') ?: '',
+    'host' => '127.0.0.1',
+    'port' => '3306',
+    'database' => 'ms-reservas',
+    'username' => 'root',
+    'password' => '',
     'charset' => 'utf8mb4',
     'collation' => 'utf8mb4_unicode_ci',
-    'prefix' => '',
-];
-$archivoLocal = __DIR__ . '/database.local.php';
-if (is_file($archivoLocal)) {
-    $configuracion = array_replace($configuracion, require $archivoLocal);
-}
-$capsule = new Capsule();
-$capsule->addConnection($configuracion);
-$capsule->addConnection(require __DIR__ . '/auth.php', 'auth');
+]);
+
+// Solo lectura para comprobar el token y la sesión.
+$capsule->addConnection([
+    'driver' => 'mysql',
+    'host' => '127.0.0.1',
+    'port' => '3306',
+    'database' => 'ms-auth',
+    'username' => 'root',
+    'password' => '',
+    'charset' => 'utf8mb4',
+    'collation' => 'utf8mb4_unicode_ci',
+    'options' => [PDO::MYSQL_ATTR_INIT_COMMAND => 'SET SESSION TRANSACTION READ ONLY'],
+], 'auth');
+
 $capsule->setAsGlobal();
 $capsule->bootEloquent();
+
 return $capsule;
 

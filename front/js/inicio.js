@@ -10,7 +10,6 @@ const mensajeMesas = document.getElementById("mensaje-mesas");
 const listaMesas = document.getElementById("lista-mesas");
 const filtroEstado = document.getElementById("filtro-estado");
 
-// El frontend se abre desde ms-auth en el puerto 8000.
 const API_RESERVAS = "http://" + window.location.hostname + ":8001";
 const nombresEstados = {
     disponible: "Disponible",
@@ -18,26 +17,19 @@ const nombresEstados = {
     ocupada: "Ocupada",
     fuera_servicio: "Fuera de servicio"
 };
-let peticionMesas = null;
-let revisionSesion = 0;
 let mesasCargadas = [];
-
-function cancelarCargaMesas() {
-    if (peticionMesas) peticionMesas.abort();
-}
+let cargandoMesas = false;
 
 function volverAlLogin() {
-    cancelarCargaMesas();
     datosSesion.hidden = true;
     sessionStorage.removeItem("token");
     window.location.replace("/");
 }
 
-function mostrarMesas(mesas) {
-    const mesasVisibles = mesas.filter(mesa => filtroEstado.value === "" || mesa.estado === filtroEstado.value);
-    mensajeMesas.className = "descripcion";
+function mostrarMesas() {
+    const mesas = mesasCargadas.filter(mesa => filtroEstado.value === "" || mesa.estado === filtroEstado.value);
     listaMesas.replaceChildren();
-    for (const mesa of mesasVisibles) {
+    for (const mesa of mesas) {
         const tarjeta = document.createElement("article");
         tarjeta.className = "mesa";
         const nombre = document.createElement("h3");
@@ -45,76 +37,65 @@ function mostrarMesas(mesas) {
         const capacidad = document.createElement("p");
         capacidad.textContent = "Capacidad: " + mesa.capacidad + " personas";
         const estadoMesa = document.createElement("span");
-        const estadoConocido = Object.hasOwn(nombresEstados, mesa.estado);
-        estadoMesa.className = "estado-mesa " + (estadoConocido ? "estado-" + mesa.estado : "");
-        estadoMesa.textContent = estadoConocido ? nombresEstados[mesa.estado] : "Sin estado";
+        const conocido = Object.hasOwn(nombresEstados, mesa.estado);
+        estadoMesa.className = "estado-mesa " + (conocido ? "estado-" + mesa.estado : "");
+        estadoMesa.textContent = conocido ? nombresEstados[mesa.estado] : "Sin estado";
         tarjeta.append(nombre, capacidad, estadoMesa);
         listaMesas.append(tarjeta);
     }
-    if (mesas.length === 0) {
+
+    mensajeMesas.className = "descripcion";
+    if (mesasCargadas.length === 0) {
         mensajeMesas.textContent = "Todavía no hay mesas registradas.";
-    } else if (filtroEstado.value === "") {
-        mensajeMesas.textContent = mesas.length + (mesas.length === 1 ? " mesa registrada." : " mesas registradas.");
-    } else if (mesasVisibles.length === 0) {
-        mensajeMesas.textContent = "No hay mesas con ese estado (0 de " + mesas.length + ").";
+    } else if (mesas.length === 0) {
+        mensajeMesas.textContent = "No hay mesas con ese estado.";
     } else {
-        mensajeMesas.textContent = "Mostrando " + mesasVisibles.length + " de " + mesas.length + " mesas.";
+        mensajeMesas.textContent = "Mostrando " + mesas.length + " de " + mesasCargadas.length + " mesas.";
     }
 }
 
 async function cargarMesas() {
+    if (cargandoMesas) return;
     const token = sessionStorage.getItem("token");
     if (!token) {
         volverAlLogin();
         return;
     }
-    cancelarCargaMesas();
-    const cancelacion = new AbortController();
-    peticionMesas = cancelacion;
-    const limite = setTimeout(() => cancelacion.abort(), 10000);
+    cargandoMesas = true;
     actualizarMesas.disabled = true;
     filtroEstado.disabled = true;
     mesasCargadas = [];
     listaMesas.replaceChildren();
-    listaMesas.setAttribute("aria-busy", "true");
-    mensajeMesas.className = "descripcion";
     mensajeMesas.textContent = "Cargando mesas...";
+    mensajeMesas.className = "descripcion";
+
     try {
         const respuesta = await fetch(API_RESERVAS + "/mesas", {
-            headers: { "Authorization": "Bearer " + token, "Accept": "application/json" },
-            cache: "no-store",
-            signal: cancelacion.signal
+            headers: { "Authorization": "Bearer " + token }
         });
-        if (peticionMesas !== cancelacion) return;
+        if (sessionStorage.getItem("token") !== token) return;
         if (respuesta.status === 401) {
             volverAlLogin();
             return;
         }
-        if (!respuesta.ok) throw new Error("No se pudieron consultar las mesas.");
+        if (!respuesta.ok) throw new Error("No se pudieron cargar las mesas.");
         const datos = await respuesta.json();
         if (!Array.isArray(datos.mesas)) throw new Error("Respuesta inválida.");
-        if (peticionMesas === cancelacion) {
-            mesasCargadas = datos.mesas;
-            mostrarMesas(mesasCargadas);
-        }
+        mesasCargadas = datos.mesas;
+        mostrarMesas();
     } catch (error) {
-        if (peticionMesas === cancelacion && !datosSesion.hidden) {
+        if (!datosSesion.hidden) {
             mensajeMesas.className = "mensaje error";
-            mensajeMesas.textContent = "No se pudieron cargar las mesas. Intenta nuevamente con Actualizar mesas.";
+            mensajeMesas.textContent = "No se pudieron cargar las mesas. Intenta nuevamente.";
         }
     } finally {
-        clearTimeout(limite);
-        if (peticionMesas === cancelacion) {
-            peticionMesas = null;
-            actualizarMesas.disabled = false;
-            filtroEstado.disabled = mesasCargadas.length === 0;
-            listaMesas.setAttribute("aria-busy", "false");
-        }
+        cargandoMesas = false;
+        actualizarMesas.disabled = false;
+        filtroEstado.disabled = mesasCargadas.length === 0;
     }
 }
 
 async function consultarSesion() {
-    const revision = ++revisionSesion;
     const token = sessionStorage.getItem("token");
     if (!token) {
         volverAlLogin();
@@ -122,65 +103,52 @@ async function consultarSesion() {
     }
     try {
         const respuesta = await fetch("/sesion", {
-            headers: { "Authorization": "Bearer " + token, "Accept": "application/json" },
-            cache: "no-store"
+            headers: { "Authorization": "Bearer " + token }
         });
-        if (revision !== revisionSesion) return;
+        if (sessionStorage.getItem("token") !== token) return;
         if (respuesta.status === 401) {
             volverAlLogin();
             return;
         }
-        const datos = await respuesta.json();
         if (!respuesta.ok) throw new Error("No se pudo comprobar la sesión.");
-        if (revision !== revisionSesion) return;
+        const datos = await respuesta.json();
         document.getElementById("nombre-usuario").textContent = datos.usuario.nombre;
         document.getElementById("rol-usuario").textContent = "Rol: " + datos.usuario.rol;
         estado.textContent = "Sesión iniciada correctamente.";
         volverLogin.hidden = true;
-        cerrarSesion.disabled = false;
         datosSesion.hidden = false;
         await cargarMesas();
     } catch (error) {
-        if (revision !== revisionSesion) return;
-        estado.textContent = "No se pudo comprobar tu sesión. Recarga la página para intentar nuevamente.";
+        estado.textContent = "No se pudo comprobar tu sesión. Recarga la página.";
         volverLogin.hidden = false;
     }
 }
 
 actualizarMesas.addEventListener("click", cargarMesas);
-filtroEstado.addEventListener("change", function () {
-    mostrarMesas(mesasCargadas);
-});
-
+filtroEstado.addEventListener("change", mostrarMesas);
 cerrarSesion.addEventListener("click", async function () {
     cerrarSesion.disabled = true;
-    cancelarCargaMesas();
     mensaje.textContent = "";
     try {
         const respuesta = await fetch("/logout", {
             method: "POST",
-            headers: { "Authorization": "Bearer " + sessionStorage.getItem("token"), "Accept": "application/json" }
+            headers: { "Authorization": "Bearer " + sessionStorage.getItem("token") }
         });
-        if (respuesta.ok || respuesta.status === 401) {
-            ++revisionSesion;
-            volverAlLogin();
-            return;
-        }
-        throw new Error("No se pudo cerrar la sesión.");
+        if (!respuesta.ok && respuesta.status !== 401) throw new Error("No se pudo cerrar la sesión.");
+        volverAlLogin();
     } catch (error) {
         mensaje.className = "mensaje error";
         mensaje.textContent = "No se pudo cerrar la sesión. Intenta nuevamente.";
+    } finally {
         cerrarSesion.disabled = false;
     }
 });
 
 window.addEventListener("pageshow", function () {
     datosSesion.hidden = true;
-    cancelarCargaMesas();
     listaMesas.replaceChildren();
     mesasCargadas = [];
     filtroEstado.disabled = true;
-    mensajeMesas.textContent = "";
     consultarSesion();
 });
 
