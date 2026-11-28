@@ -38,8 +38,56 @@
                         <option value="fuera_servicio">Fuera de servicio</option>
                     </select>
                 </div>
+                <form id="form-mesa">
+                    <h3 id="titulo-form-mesa">Nueva mesa</h3>
+                    <label>Nombre o número<input name="numero" required maxlength="20"></label>
+                    <label>Capacidad<input name="capacidad" type="number" min="1" required></label>
+                    <label>Estado<select name="estado"><option value="disponible">Disponible</option><option value="reservada">Reservada</option>
+                            <option value="ocupada">Ocupada</option><option value="fuera_servicio">Fuera de servicio</option></select></label>
+                    <div class="acciones">
+                        <button type="submit">Guardar mesa</button>
+                        <button id="salir-mesa" class="boton-secundario" type="button" hidden>Cancelar edición</button>
+                    </div>
+                </form>
                 <p id="mensaje-mesas" class="descripcion" role="status" aria-live="polite"></p>
                 <div id="lista-mesas" class="lista-mesas"></div>
+            </section>
+            <section class="seccion-mesas" aria-labelledby="titulo-reservas">
+                <h2 id="titulo-reservas">Reservas</h2>
+                <form id="form-reserva">
+                    <h3 id="titulo-form-reserva">Nueva reserva</h3>
+                    <label>Cliente<input name="nombre_cliente" required maxlength="150"></label>
+                    <label>Teléfono<input name="telefono_cliente" type="tel" required maxlength="30"></label>
+                    <label>Fecha<input name="fecha" type="date" required></label>
+                    <label>Hora<input name="hora" type="time" step="1" required></label>
+                    <label>Personas<input name="cantidad_personas" type="number" min="1" required></label>
+                    <div class="acciones">
+                        <button id="buscar-mesas" class="boton-secundario" type="button">Consultar mesas disponibles</button>
+                    </div>
+                    <p id="mensaje-disponibilidad" class="descripcion" role="status"></p>
+                    <label>Mesa<select name="mesa_id" required></select></label>
+                    <label>Observaciones<textarea name="observaciones" rows="2" maxlength="65535"></textarea></label>
+                    <div class="acciones">
+                        <button type="submit">Guardar reserva</button>
+                        <button id="salir-reserva" class="boton-secundario" type="button" hidden>Cancelar edición</button>
+                    </div>
+                </form>
+                <p id="mensaje-reservas" class="descripcion" role="status"></p>
+                <form id="filtros-reservas">
+                    <h3>Buscar reservas</h3>
+                    <label>Fecha<input name="fecha" type="date"></label>
+                    <label>Cliente<input name="cliente" maxlength="150"></label>
+                    <label>Estado<select name="estado">
+                        <option value="">Todos</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="confirmada">Confirmada</option>
+                        <option value="cancelada">Cancelada</option>
+                        <option value="finalizada">Finalizada</option>
+                    </select></label>
+                    <button type="submit">Buscar reservas</button>
+                </form>
+                <p id="estado-reservas" class="descripcion" role="status"></p>
+                <div id="lista-reservas" class="lista-mesas"></div>
             </section>
         </section>
         <p id="mensaje" class="mensaje" role="status" aria-live="polite"></p>

@@ -13,11 +13,11 @@ final class Autenticacion
 {
     public function __invoke(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $cabecera = $request->getHeaderLine('Authorization');
-        if (!preg_match('/^Bearer ([a-f0-9]{64})$/D', $cabecera, $coincidencias)) {
+        $token = $this->leerToken($request->getHeaderLine('Authorization'));
+        if ($token === null) {
             return Json::responder(new Response(), ['mensaje' => 'Debes iniciar sesión.'], 401);
         }
-        $usuario = Usuario::where('token', hash('sha256', $coincidencias[1]))
+        $usuario = Usuario::where('token', hash('sha256', $token))
             ->where('sesion_activa', true)
             ->where('estado', 'activo')
             ->first();
@@ -25,6 +25,21 @@ final class Autenticacion
             return Json::responder(new Response(), ['mensaje' => 'La sesión ya no está activa.'], 401);
         }
         return $handler->handle($request->withAttribute('usuario', $usuario));
+    }
+
+    private function leerToken(string $cabecera): ?string
+    {
+        if (strlen($cabecera) !== 71 || substr($cabecera, 0, 7) !== 'Bearer ') {
+            return null;
+        }
+
+        $token = substr($cabecera, 7);
+        for ($i = 0; $i < 64; $i++) {
+            if (strpos('0123456789abcdef', $token[$i]) === false) {
+                return null;
+            }
+        }
+        return $token;
     }
 }
 

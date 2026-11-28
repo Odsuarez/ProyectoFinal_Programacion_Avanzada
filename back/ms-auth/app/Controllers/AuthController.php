@@ -33,17 +33,19 @@ final class AuthController
         $esHash = password_get_info($guardada)['algoName'] !== 'unknown';
         $valida = $esHash
             ? password_verify($contrasena, $guardada)
-            : ($guardada !== '' && hash_equals($guardada, $contrasena));
+            : ($guardada !== '' && $guardada === $contrasena);
 
         if (!$usuario || !$valida) {
             return Json::responder($response, ['mensaje' => 'Usuario o contraseña incorrectos.'], 401);
         }
 
-        // Los datos iniciales del Word usan texto plano: se convierten al ingresar.
-        if (!$esHash || password_needs_rehash($guardada, PASSWORD_DEFAULT)) {
-            $usuario->contrasena = password_hash($contrasena, PASSWORD_DEFAULT);
+        $bytes = random_bytes(32);
+        $hexadecimal = '0123456789abcdef';
+        $token = '';
+        for ($i = 0; $i < 32; $i++) {
+            $byte = ord($bytes[$i]);
+            $token .= $hexadecimal[$byte >> 4] . $hexadecimal[$byte & 15];
         }
-        $token = bin2hex(random_bytes(32));
         // Solo se guarda la huella del token; el token original se entrega al navegador.
         $usuario->token = hash('sha256', $token);
         $usuario->sesion_activa = true;

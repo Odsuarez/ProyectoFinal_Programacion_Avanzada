@@ -199,10 +199,24 @@ final class ReservaService
 
     private function hora($valor): string
     {
-        if (!is_string($valor) || !preg_match('/^(?:[01][0-9]|2[0-3]):[0-5][0-9](?::[0-5][0-9])?$/D', $valor)) {
-            throw new DomainException('La hora debe tener formato HH:MM o HH:MM:SS.', 422);
+        $longitud = is_string($valor) ? strlen($valor) : 0;
+        $mensaje = 'La hora debe tener formato HH:MM o HH:MM:SS.';
+        if ($longitud !== 5 && $longitud !== 8) {
+            throw new DomainException($mensaje, 422);
         }
-        return strlen($valor) === 5 ? $valor . ':00' : $valor;
+
+        $partes = explode(':', $valor);
+        if (count($partes) !== ($longitud === 5 ? 2 : 3)) {
+            throw new DomainException($mensaje, 422);
+        }
+
+        foreach ($partes as $i => $parte) {
+            $maximo = $i === 0 ? 23 : 59;
+            if (strlen($parte) !== 2 || strspn($parte, '0123456789') !== 2 || (int) $parte > $maximo) {
+                throw new DomainException($mensaje, 422);
+            }
+        }
+        return $longitud === 5 ? $valor . ':00' : $valor;
     }
 
     private function noPasado(string $fecha, string $hora): void

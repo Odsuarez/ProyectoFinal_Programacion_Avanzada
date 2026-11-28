@@ -26,11 +26,24 @@ final class Entrada
 
     public static function id($valor): int
     {
-        $id = filter_var($valor, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
-        if ($id === false || is_bool($valor) || is_float($valor)) {
-            throw new DomainException('El identificador debe ser un entero positivo.', 422);
+        if (is_int($valor) && $valor > 0) {
+            return $valor;
         }
-        return $id;
+        if (is_string($valor)) {
+            $texto = trim($valor, " \t\n\r\v\f");
+            if ($texto !== '' && $texto[0] === '+') {
+                $texto = substr($texto, 1);
+            }
+
+            $longitud = strlen($texto);
+            $maximo = (string) PHP_INT_MAX;
+            if ($longitud > 0 && $texto[0] !== '0'
+                && strspn($texto, '0123456789') === $longitud
+                && ($longitud < strlen($maximo)
+                    || ($longitud === strlen($maximo) && strcmp($texto, $maximo) <= 0))) {
+                return (int) $texto;
+            }
+        }
+        throw new DomainException('El identificador debe ser un entero positivo.', 422);
     }
 }
-
